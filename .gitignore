@@ -1,0 +1,8 @@
+build/
+*.ovl
+*.nro
+*.nacp
+*.elf
+*.map
+tests/core_test
+ref/

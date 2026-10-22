@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZeroTier NX — overlay Ultrahand moderno</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#14161a;color:#e8eaed;font:14px system-ui,sans-serif;padding:16px}
+h1{font-size:18px;margin-bottom:12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bar button{background:#22262d;color:#e8eaed;border:1px solid #3a404a;border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}
+.bar button:hover{background:#2c313a}
+.bar button:focus-visible{outline:2px solid #5eead4;outline-offset:2px}
+.bar button[aria-selected=true]{background:#0f766e;border-color:#5eead4;color:#fff}
+.note{color:#9aa3af;font-size:12px;margin-bottom:10px}
+#wrap{width:100%;overflow:hidden}
+#stage{width:1280px;height:720px;position:relative;transform-origin:0 0;overflow:hidden;background:#0b1020;border:1px solid #3a404a}
+.scene{position:absolute;inset:-40px;filter:blur(14px);
+background:radial-gradient(circle at 75% 30%,#ffd37a 0,#f08a4b 18%,transparent 40%),linear-gradient(180deg,#4aa3df 0,#9ad0ec 45%,#3f7d3a 46%,#2b5a2a 100%)}
+.scene:after{content:"";position:absolute;left:55%;top:40%;width:180px;height:200px;background:#7a2e2e;border-radius:20px}
+.panel{position:absolute;left:0;top:0;width:448px;height:720px;display:flex;flex-direction:column;overflow:hidden}
+.hd{padding:22px 28px 14px;flex:none}
+.bd{flex:1;overflow:hidden;padding:0 20px}
+.ft{flex:none;padding:14px 28px;display:flex;gap:26px;font-size:18px}
+.sw{display:inline-block;width:46px;height:22px;border-radius:11px;position:relative;vertical-align:middle}
+.sw:after{content:"";position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;left:3px}
+.sw.on:after{left:27px}
+.qr{display:block}
+.k{display:flex;justify-content:space-between;align-items:center}
+.keys{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+/* 2 ultrahand */
+.a2{background:rgba(14,22,44,.9);color:#e6ecff;font:21px system-ui,sans-serif;border-right:1px solid #2d3d6b}
+.a2 .hd{background:#16224a;padding:24px 28px 18px}.a2 .hd b{font-size:30px}.a2 .hd small{color:#8fa3e0;font-size:15px;display:block;margin-top:2px}
+.a2 .it{margin:10px 0;padding:16px 16px;border:1px solid #28386a;border-radius:14px;display:flex;align-items:center;gap:14px;background:#111b3a}
+.a2 .it .ic{width:34px;height:34px;border-radius:9px;background:#26376f;display:grid;place-items:center;font-size:19px;flex:none}
+.a2 .it .t{flex:1}.a2 .it.sel{border:2px solid #6c8cff;background:#1d2d63}
+.a2 .sw{background:#3a4a80}.a2 .sw.on{background:#4f7cff}
+.a2 .ft{background:#16224a;color:#b8c6f5}
+.a2 .key{border:1px solid #28386a;border-radius:8px;text-align:center;padding:9px 0;background:#111b3a}
+.a2 .key.sel{border:2px solid #6c8cff;background:#1d2d63}
+</style>
+</head>
+<body>
+<h1>ZeroTier NX — overlay Tesla · Ultrahand moderno</h1>
+<div class="bar" id="screens" aria-label="Pantalla"></div>
+<p class="note">QR decorativo, no escaneable. Marco 1280×720; panel Tesla 448×720.</p>
+<div id="wrap"><div id="stage"><div class="scene"></div><div class="panel" id="panel"></div></div></div>
+
+<script>
+const SCREENS=[['menu','Menú'],['status','Estado'],['qr','Login QR'],['manual','Login manual'],['nets','Redes guardadas']];
+const VER='v0.1.0';
+const ST=[['Estado','Conectado'],['IP','10.147.17.42'],['Node ID','a1b2c3d4e5'],['Peers','4 (3 directos)'],['Ping','23 ms'],['Red','8056c2e21c000001']];
+const NETS=[['Casa LAN Party','8056c2e21c000001','activa'],['Amigos Smash','a09acf0233f1b2c4',''],['Torneo Mario Kart','1d71939404c8e7f0','']];
+const ID='8056c2e21c0000';
+const MENU=[['Conexión','toggle','⏻'],['Estado','','📶'],['Iniciar sesión con QR','','▦'],['Iniciar sesión manual','','⌨'],['Redes guardadas','','☰'],['Acerca de','','ℹ']];
+let scr='menu';
+
+// QR decorativo: patrón pseudoaleatorio con 3 marcadores de esquina
+function qr(px,fg,bg){
+  const n=25,c=px/n;let s=7,r=()=>(s=(s*16807)%2147483647)/2147483647,o='';
+  const fin=(x,y)=>(x<7&&y<7)||(x>=n-7&&y<7)||(x<7&&y>=n-7);
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    let on;
+    if(fin(x,y)){const lx=x%(n-7>x?99:1)&&0;const ax=x>=n-7?x-(n-7):x,ay=y>=n-7?y-(n-7):y;
+      on=ax==0||ax==6||ay==0||ay==6||(ax>=2&&ax<=4&&ay>=2&&ay<=4);}
+    else if((x==7&&y<8)||(y==7&&x<8)||(x==n-8&&y<8)||(y==7&&x>=n-8)||(x==7&&y>=n-8)||(y==n-8&&x<8)){on=false;r();}
+    else on=r()>.5;
+    if(on)o+=`<rect x="${x*c}" y="${y*c}" width="${c+.5}" height="${c+.5}"/>`;
+  }
+  return `<svg class="qr" width="${px}" height="${px}" viewBox="0 0 ${px} ${px}" style="background:${bg}" fill="${fg}" role="img" aria-label="Código QR de ejemplo">${o}</svg>`;
+}
+const sw=(on)=>`<span class="sw ${on?'on':''}" aria-label="${on?'ON':'OFF'}"></span>`;
+const swT=(on)=>`<span class="sw">${on?'[ON ]':'[OFF]'}</span>`;
+const foot=(a,b='Ⓑ Volver',x='')=>`<div class="ft"><span>Ⓐ ${a}</span><span>${b}</span>${x?`<span>${x}</span>`:''}</div>`;
+const hdr=(sub='')=>`<div class="hd"><b>ZeroTier NX</b><small>${VER}</small>${sub}</div>`;
+const keypad=()=>{const h='0123456789abcdef';let o='<div class="keys">';for(const c of h)o+=`<div class="key ${c=='3'?'sel':''}">${c}</div>`;return o+'</div>'};
+const idBox=(st)=>`<div style="font:600 26px ui-monospace,Menlo,monospace;letter-spacing:2px;padding:14px 4px;text-align:center">${ID.slice(0,8)} ${ID.slice(8)}<span style="opacity:.9">3▌</span><span style="opacity:.35">_</span></div>`;
+
+// ---------- 2 ultrahand ----------
+function r2(){
+  const spark='<svg width="140" height="34" viewBox="0 0 140 34" style="float:right;margin-top:-34px"><polyline fill="none" stroke="#6c8cff" stroke-width="2" points="0,26 14,22 28,24 42,14 56,18 70,10 84,16 98,8 112,12 126,6 140,9"/></svg>';
+  const sub=`<small>● Conectado · 10.147.17.42 · 23 ms</small>${spark}`;
+  let b,f;
+  if(scr=='menu'){b=MENU.map((m,i)=>`<div class="it ${i==0?'sel':''}"><span class="ic">${m[2]}</span><span class="t">${m[0]}</span>${m[1]?sw(true):''}</div>`).join('');f=foot('Aceptar');}
+  else if(scr=='status'){b=ST.map(r=>`<div class="it"><span class="t" style="color:#8fa3e0">${r[0]}</span><span>${r[1]}</span></div>`).join('');f=foot('Aceptar');}
+  else if(scr=='qr'){b=`<div style="text-align:center;padding:20px 0"><div style="display:inline-block;padding:12px;background:#fff;border-radius:14px">${qr(260,'#0e162c','#fff')}</div><p style="margin-top:16px">Escanea con tu teléfono</p><p style="font-size:15px;color:#8fa3e0;margin-top:4px">Configura la red desde el navegador</p></div>`;f=foot('Actualizar');}
+  else if(scr=='manual'){b=`<p style="padding:14px 4px 0;font-size:16px;color:#8fa3e0">Network ID</p><div class="it" style="justify-content:center">${idBox()}</div>${keypad()}`;f=foot('Escribir','Ⓑ Borrar','Ⓧ Unirse');}
+  else{b=NETS.map((n,i)=>`<div class="it ${i==0?'sel':''}"><span class="ic">${n[2]?'●':'○'}</span><span class="t">${n[0]}<br><small style="color:#8fa3e0;font-size:14px">${n[1]}</small></span></div>`).join('');f=foot('Conectar','Ⓑ Volver','Ⓨ Olvidar');}
+  return hdr(sub)+`<div class="bd">${b}</div>`+f;
+}
+const R=[r2];
+
+function draw(){
+  const p=document.getElementById('panel');
+  p.className='panel a2';
+  p.innerHTML=R[0]();
+  document.querySelectorAll('#screens button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s==scr));
+}
+function mk(id,items,fn){
+  const el=document.getElementById(id);
+  items.forEach((it,i)=>{const b=document.createElement('button');b.textContent=Array.isArray(it)?it[1]:it;b.dataset.s=Array.isArray(it)?it[0]:i;b.onclick=()=>{fn(i,it);draw()};el.appendChild(b)});
+}
+mk('screens',SCREENS,(i,it)=>scr=it[0]);
+function fit(){
+  const w=document.getElementById('wrap'),k=Math.min(1,(w.clientWidth)/1282);
+  const s=document.getElementById('stage');s.style.transform=`scale(${k})`;w.style.height=(722*k)+'px';
+}
+addEventListener('resize',fit);
+draw();fit();
+</script>
+</body>
+</html>

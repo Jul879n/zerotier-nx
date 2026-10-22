@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ZeroTier NX — mockups del overlay Tesla</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#14161a;color:#e8eaed;font:14px system-ui,sans-serif;padding:16px}
+h1{font-size:18px;margin-bottom:12px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.bar button{background:#22262d;color:#e8eaed;border:1px solid #3a404a;border-radius:6px;padding:8px 14px;font:inherit;cursor:pointer}
+.bar button:hover{background:#2c313a}
+.bar button:focus-visible{outline:2px solid #5eead4;outline-offset:2px}
+.bar button[aria-selected=true]{background:#0f766e;border-color:#5eead4;color:#fff}
+.note{color:#9aa3af;font-size:12px;margin-bottom:10px}
+#wrap{width:100%;overflow:hidden}
+#stage{width:1280px;height:720px;position:relative;transform-origin:0 0;overflow:hidden;background:#0b1020;border:1px solid #3a404a}
+.scene{position:absolute;inset:-40px;filter:blur(14px);
+background:radial-gradient(circle at 75% 30%,#ffd37a 0,#f08a4b 18%,transparent 40%),linear-gradient(180deg,#4aa3df 0,#9ad0ec 45%,#3f7d3a 46%,#2b5a2a 100%)}
+.scene:after{content:"";position:absolute;left:55%;top:40%;width:180px;height:200px;background:#7a2e2e;border-radius:20px}
+.panel{position:absolute;left:0;top:0;width:448px;height:720px;display:flex;flex-direction:column;overflow:hidden}
+.hd{padding:22px 28px 14px;flex:none}
+.bd{flex:1;overflow:hidden;padding:0 20px}
+.ft{flex:none;padding:14px 28px;display:flex;gap:26px;font-size:18px}
+.sw{display:inline-block;width:46px;height:22px;border-radius:11px;position:relative;vertical-align:middle}
+.sw:after{content:"";position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;left:3px}
+.sw.on:after{left:27px}
+.qr{display:block}
+.k{display:flex;justify-content:space-between;align-items:center}
+.keys{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+/* 1 clásico */
+.a1{background:rgba(0,0,0,.82);color:#fff;font:22px "Helvetica Neue",Arial,sans-serif}
+.a1 .hd{border-bottom:1px solid #777}.a1 .hd b{font-size:32px}.a1 .hd small{font-size:16px;color:#aaa;margin-left:8px}
+.a1 .it{padding:13px 8px;border:1px solid transparent;border-bottom-color:#444;display:flex;justify-content:space-between;align-items:center}
+.a1 .it.sel{border:2px solid #2ee6d6;background:rgba(46,230,214,.14);color:#2ee6d6}
+.a1 .sw{background:#555}.a1 .sw.on{background:#2ee6d6}
+.a1 .ft{border-top:1px solid #777;color:#ddd}
+.a1 .key{border:1px solid #666;border-radius:4px;text-align:center;padding:8px 0;font-size:20px}
+.a1 .key.sel{border:2px solid #2ee6d6;color:#2ee6d6}
+/* 2 ultrahand */
+.a2{background:rgba(14,22,44,.9);color:#e6ecff;font:21px system-ui,sans-serif;border-right:1px solid #2d3d6b}
+.a2 .hd{background:#16224a;padding:24px 28px 18px}.a2 .hd b{font-size:30px}.a2 .hd small{color:#8fa3e0;font-size:15px;display:block;margin-top:2px}
+.a2 .it{margin:10px 0;padding:16px 16px;border:1px solid #28386a;border-radius:14px;display:flex;align-items:center;gap:14px;background:#111b3a}
+.a2 .it .ic{width:34px;height:34px;border-radius:9px;background:#26376f;display:grid;place-items:center;font-size:19px;flex:none}
+.a2 .it .t{flex:1}.a2 .it.sel{border:2px solid #6c8cff;background:#1d2d63}
+.a2 .sw{background:#3a4a80}.a2 .sw.on{background:#4f7cff}
+.a2 .ft{background:#16224a;color:#b8c6f5}
+.a2 .key{border:1px solid #28386a;border-radius:8px;text-align:center;padding:9px 0;background:#111b3a}
+.a2 .key.sel{border:2px solid #6c8cff;background:#1d2d63}
+/* 3 compacto */
+.a3{background:rgba(10,12,16,.9);color:#eee;font:18px system-ui,sans-serif}
+.a3 .hd{padding:14px 20px 10px;border-bottom:1px solid #444}.a3 .hd b{font-size:22px}
+.a3 .strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px}
+.a3 .strip div{border:1px solid #3d4452;border-radius:6px;padding:6px 8px;background:#161a22;font-size:13px;color:#9aa3af}
+.a3 .strip div span{display:block;color:#fff;font-size:17px;font-weight:600}
+.a3 .grp{border:1px solid #3d4452;border-radius:8px;margin:8px 0;overflow:hidden}
+.a3 .gh{padding:10px 12px;background:#1a1f29;display:flex;justify-content:space-between}
+.a3 .gh.sel{border:2px solid #f5c542;background:#2a2410;color:#f5c542}
+.a3 .it{padding:8px 12px 8px 26px;border-top:1px solid #2a303b;display:flex;justify-content:space-between;font-size:16px}
+.a3 .it.sel{border:2px solid #f5c542;color:#f5c542;background:#2a2410}
+.a3 .sw{background:#444}.a3 .sw.on{background:#35c46a}
+.a3 .ft{font-size:15px;padding:10px 20px;border-top:1px solid #444;color:#bbb}
+.a3 .key{border:1px solid #3d4452;border-radius:5px;text-align:center;padding:6px 0;font-size:16px}
+.a3 .key.sel{border:2px solid #f5c542;color:#f5c542}
+/* 4 pestañas */
+.a4{background:rgba(18,18,24,.92);color:#f1f1f5;font:20px system-ui,sans-serif}
+.a4 .hd{padding:18px 24px 8px}.a4 .hd b{font-size:26px}.a4 .hd small{color:#9a9ab0;font-size:14px;margin-left:8px}
+.a4 .tabs{display:flex;gap:6px;padding:0 20px 10px;border-bottom:1px solid #3c3c4c}
+.a4 .tab{flex:1;text-align:center;padding:9px 0;border:1px solid #3c3c4c;border-radius:8px;font-size:17px;color:#b4b4c8}
+.a4 .tab.on{border:2px solid #ff6b9a;color:#fff;background:#3a1a2a}
+.a4 .it{padding:13px 10px;border:1px solid transparent;border-bottom-color:#33333f;display:flex;justify-content:space-between;align-items:center}
+.a4 .it.sel{border:2px solid #ff6b9a;background:#3a1a2a;border-radius:8px}
+.a4 .sw{background:#4a4a5a}.a4 .sw.on{background:#ff6b9a}
+.a4 .ft{border-top:1px solid #3c3c4c;color:#c4c4d6}
+.a4 .key{border:1px solid #3c3c4c;border-radius:6px;text-align:center;padding:8px 0}
+.a4 .key.sel{border:2px solid #ff6b9a;background:#3a1a2a}
+.a4 .qrbox{background:#fff;padding:12px;border-radius:10px;width:300px;margin:6px auto 10px}
+/* 5 terminal */
+.a5{background:rgba(8,5,0,.93);color:#ffb000;font:18px/1.5 "SF Mono",Menlo,Consolas,monospace;border-right:1px solid #ffb000}
+.a5 .hd{border-bottom:1px solid #ffb000;padding:16px 22px 10px;white-space:pre}
+.a5 .it{padding:3px 8px;border:1px solid transparent;display:flex;justify-content:space-between}
+.a5 .it.sel{border:1px solid #ffb000;background:#ffb000;color:#080500}
+.a5 .sw{width:auto;height:auto;background:none;border-radius:0}.a5 .sw:after{display:none}
+.a5 .ft{border-top:1px solid #ffb000;font-size:16px;padding:10px 22px}
+.a5 .key{border:1px solid #ffb000;text-align:center;padding:3px 0}
+.a5 .key.sel{background:#ffb000;color:#080500}
+.a5 .dim{color:#a87400}
+.a5 .qrbox{background:#080500;border:1px solid #ffb000;padding:10px;width:300px;margin:6px auto}
+</style>
+</head>
+<body>
+<h1>ZeroTier NX — overlay Tesla (mockups estáticos)</h1>
+<div class="bar" id="alts" role="tablist" aria-label="Alternativa"></div>
+<div class="bar" id="screens" aria-label="Pantalla"></div>
+<p class="note">QR decorativo, no escaneable. Marco 1280×720; panel Tesla 448×720.</p>
+<div id="wrap"><div id="stage"><div class="scene"></div><div class="panel" id="panel"></div></div></div>
+
+<script>
+const ALTS=['1 · Tesla clásico','2 · Ultrahand moderno','3 · Compacto informativo','4 · Pestañas horizontales','5 · Retro terminal'];
+const SCREENS=[['menu','Menú'],['status','Estado'],['qr','Login QR'],['manual','Login manual'],['nets','Redes guardadas']];
+const VER='v0.1.0';
+const ST=[['Estado','Conectado'],['IP','10.147.17.42'],['Node ID','a1b2c3d4e5'],['Peers','4 (3 directos)'],['Ping','23 ms'],['Red','8056c2e21c000001']];
+const NETS=[['Casa LAN Party','8056c2e21c000001','activa'],['Amigos Smash','a09acf0233f1b2c4',''],['Torneo Mario Kart','1d71939404c8e7f0','']];
+const ID='8056c2e21c0000';
+const MENU=[['Conexión','toggle','⏻'],['Estado','','📶'],['Iniciar sesión con QR','','▦'],['Iniciar sesión manual','','⌨'],['Redes guardadas','','☰'],['Acerca de','','ℹ']];
+let alt=0,scr='menu';
+
+// QR decorativo: patrón pseudoaleatorio con 3 marcadores de esquina
+function qr(px,fg,bg){
+  const n=25,c=px/n;let s=7,r=()=>(s=(s*16807)%2147483647)/2147483647,o='';
+  const fin=(x,y)=>(x<7&&y<7)||(x>=n-7&&y<7)||(x<7&&y>=n-7);
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+    let on;
+    if(fin(x,y)){const lx=x%(n-7>x?99:1)&&0;const ax=x>=n-7?x-(n-7):x,ay=y>=n-7?y-(n-7):y;
+      on=ax==0||ax==6||ay==0||ay==6||(ax>=2&&ax<=4&&ay>=2&&ay<=4);}
+    else if((x==7&&y<8)||(y==7&&x<8)||(x==n-8&&y<8)||(y==7&&x>=n-8)||(x==7&&y>=n-8)||(y==n-8&&x<8)){on=false;r();}
+    else on=r()>.5;
+    if(on)o+=`<rect x="${x*c}" y="${y*c}" width="${c+.5}" height="${c+.5}"/>`;
+  }
+  return `<svg class="qr" width="${px}" height="${px}" viewBox="0 0 ${px} ${px}" style="background:${bg}" fill="${fg}" role="img" aria-label="Código QR de ejemplo">${o}</svg>`;
+}
+const sw=(on)=>`<span class="sw ${on?'on':''}" aria-label="${on?'ON':'OFF'}"></span>`;
+const swT=(on)=>`<span class="sw">${on?'[ON ]':'[OFF]'}</span>`;
+const foot=(a,b='Ⓑ Volver',x='')=>`<div class="ft"><span>Ⓐ ${a}</span><span>${b}</span>${x?`<span>${x}</span>`:''}</div>`;
+const hdr=(sub='')=>`<div class="hd"><b>ZeroTier NX</b><small>${VER}</small>${sub}</div>`;
+const keypad=()=>{const h='0123456789abcdef';let o='<div class="keys">';for(const c of h)o+=`<div class="key ${c=='3'?'sel':''}">${c}</div>`;return o+'</div>'};
+const idBox=(st)=>`<div style="font:600 26px ui-monospace,Menlo,monospace;letter-spacing:2px;padding:14px 4px;text-align:center">${ID.slice(0,8)} ${ID.slice(8)}<span style="opacity:.9">3▌</span><span style="opacity:.35">_</span></div>`;
+
+// ---------- 1 clásico ----------
+function r1(){
+  const L=(rows,sel=-1)=>rows.map((r,i)=>`<div class="it ${i==sel?'sel':''}"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
+  let b,f;
+  if(scr=='menu'){b=MENU.map((m,i)=>`<div class="it ${i==0?'sel':''}"><span>${m[0]}</span>${m[1]?sw(true):''}</div>`).join('');f=foot('Aceptar');}
+  else if(scr=='status'){b=L(ST);f=foot('Aceptar');}
+  else if(scr=='qr'){b=`<div style="text-align:center;padding:18px 0 8px">${qr(280,'#000','#fff')}<p style="margin-top:14px;font-size:19px">Escanea con tu teléfono</p><p style="font-size:15px;color:#aaa;margin-top:4px">Completa la red en el navegador</p></div>`;f=foot('Actualizar');}
+  else if(scr=='manual'){b=`<p style="padding:10px 8px 0;font-size:17px;color:#aaa">Network ID (16 dígitos)</p>${idBox()}${keypad()}`;f=foot('Escribir','Ⓑ Borrar','Ⓧ Unirse');}
+  else{b=NETS.map((n,i)=>`<div class="it ${i==0?'sel':''}" style="flex-direction:column;align-items:flex-start"><span>${n[0]}</span><span style="font-size:15px;color:#aaa">${n[1]} ${n[2]?'· activa':''}</span></div>`).join('');f=foot('Conectar','Ⓑ Volver','Ⓨ Olvidar');}
+  return hdr()+`<div class="bd">${b}</div>`+f;
+}
+// ---------- 2 ultrahand ----------
+function r2(){
+  const spark='<svg width="140" height="34" viewBox="0 0 140 34" style="float:right;margin-top:-34px"><polyline fill="none" stroke="#6c8cff" stroke-width="2" points="0,26 14,22 28,24 42,14 56,18 70,10 84,16 98,8 112,12 126,6 140,9"/></svg>';
+  const sub=`<small>● Conectado · 10.147.17.42 · 23 ms</small>${spark}`;
+  let b,f;
+  if(scr=='menu'){b=MENU.map((m,i)=>`<div class="it ${i==0?'sel':''}"><span class="ic">${m[2]}</span><span class="t">${m[0]}</span>${m[1]?sw(true):''}</div>`).join('');f=foot('Aceptar');}
+  else if(scr=='status'){b=ST.map(r=>`<div class="it"><span class="t" style="color:#8fa3e0">${r[0]}</span><span>${r[1]}</span></div>`).join('');f=foot('Aceptar');}
+  else if(scr=='qr'){b=`<div style="text-align:center;padding:20px 0"><div style="display:inline-block;padding:12px;background:#fff;border-radius:14px">${qr(260,'#0e162c','#fff')}</div><p style="margin-top:16px">Escanea con tu teléfono</p><p style="font-size:15px;color:#8fa3e0;margin-top:4px">Configura la red desde el navegador</p></div>`;f=foot('Actualizar');}
+  else if(scr=='manual'){b=`<p style="padding:14px 4px 0;font-size:16px;color:#8fa3e0">Network ID</p><div class="it" style="justify-content:center">${idBox()}</div>${keypad()}`;f=foot('Escribir','Ⓑ Borrar','Ⓧ Unirse');}
+  else{b=NETS.map((n,i)=>`<div class="it ${i==0?'sel':''}"><span class="ic">${n[2]?'●':'○'}</span><span class="t">${n[0]}<br><small style="color:#8fa3e0;font-size:14px">${n[1]}</small></span></div>`).join('');f=foot('Conectar','Ⓑ Volver','Ⓨ Olvidar');}
+  return hdr(sub)+`<div class="bd">${b}</div>`+f;
+}
+// ---------- 3 compacto ----------
+function r3(){
+  const strip=`<div class="strip"><div>IP<span>10.147.17.42</span></div><div>Peers<span>4</span></div><div>Ping<span>23 ms</span></div></div>`;
+  const grp=(t,items,open,sel)=>`<div class="grp"><div class="gh ${sel=='h'?'sel':''}"><span>${open?'▾':'▸'} ${t}</span></div>${open?items.map((x,i)=>`<div class="it ${sel==i?'sel':''}"><span>${x[0]}</span><span>${x[1]||''}</span></div>`).join(''):''}</div>`;
+  let b,f;
+  if(scr=='menu'){
+    b=grp('Conexión',[['Conexión',sw(true)]],true,0)
+     +grp('Conectar',[['Login con QR',''],['Login manual','']],false,'')
+     +grp('Redes guardadas',[],false,'')+grp('Acerca de',[],false,'');f=foot('Aceptar');
+  }else if(scr=='status'){b=grp('Detalle',ST.slice(0,3).concat([ST[5]]),true,'')+grp('Conexión',[['Reconectar','']],false,'h');f=foot('Aceptar');}
+  else if(scr=='qr'){b=grp('Login con QR',[],true,'')+`<div style="text-align:center">${qr(250,'#000','#fff')}<p style="font-size:15px;color:#9aa3af;margin-top:8px">Escanea y completa en el teléfono</p></div>`;f=foot('Actualizar');}
+  else if(scr=='manual'){b=grp('Login manual',[],true,'')+idBox().replace('26px','22px')+keypad();f=foot('Escribir','Ⓑ Borrar','Ⓧ Unirse');}
+  else{b=grp('Redes guardadas',NETS.map(n=>[n[0],n[2]?'● activa':'']),true,0);f=foot('Conectar','Ⓑ Volver','Ⓨ Olvidar');}
+  return `<div class="hd"><b>ZeroTier NX</b> <small style="color:#9aa3af">${VER} · ● Conectado</small>${strip}</div><div class="bd">${b}</div>`+f;
+}
+// ---------- 4 pestañas ----------
+function r4(){
+  const tabs=(on)=>`<div class="tabs">${['Menú','Estado','Conectar','Redes'].map((t,i)=>`<div class="tab ${i==on?'on':''}">${t}</div>`).join('')}</div>`;
+  let t,b,f;
+  if(scr=='menu'){t=0;b=MENU.map((m,i)=>`<div class="it ${i==0?'sel':''}"><span>${m[0]}</span>${m[1]?sw(true):''}</div>`).join('');f=foot('Aceptar','Ⓑ Volver','L/R Pestaña');}
+  else if(scr=='status'){t=1;b=ST.map(r=>`<div class="it"><span style="color:#9a9ab0">${r[0]}</span><span>${r[1]}</span></div>`).join('');f=foot('Aceptar','Ⓑ Volver','L/R Pestaña');}
+  else if(scr=='qr'){t=2;b=`<div class="qrbox">${qr(276,'#000','#fff')}</div><p style="text-align:center;font-size:18px">Escanea con tu teléfono</p><p style="text-align:center;font-size:14px;color:#9a9ab0;margin-top:4px">¿Sin teléfono? Ⓧ Login manual</p>`;f=foot('Actualizar','Ⓑ Volver','Ⓧ Manual');}
+  else if(scr=='manual'){t=2;b=`<p style="padding:12px 4px 0;font-size:16px;color:#9a9ab0">Network ID</p>${idBox()}${keypad()}`;f=foot('Escribir','Ⓑ Borrar','Ⓧ Unirse');}
+  else{t=3;b=NETS.map((n,i)=>`<div class="it ${i==0?'sel':''}"><span>${n[0]}<br><small style="color:#9a9ab0;font-size:14px">${n[1]}</small></span><span>${n[2]?'●':''}</span></div>`).join('');f=foot('Conectar','Ⓑ Volver','Ⓨ Olvidar');}
+  return `<div class="hd"><b>ZeroTier NX</b><small>${VER}</small></div>${tabs(t)}<div class="bd" style="padding-top:8px">${b}</div>`+f;
+}
+// ---------- 5 terminal ----------
+function r5(){
+  const hd=`<div class="hd">┌─ ZEROTIER NX ${VER} ─┐\n└─ ${scr.toUpperCase().padEnd(18)}─┘</div>`;
+  const row=(a,b2,sel)=>`<div class="it ${sel?'sel':''}"><span>${sel?'&gt; ':'  '}${a}</span><span>${b2||''}</span></div>`;
+  let b,f;
+  if(scr=='menu'){b=MENU.map((m,i)=>row(m[0],m[1]?swT(true):'',i==0)).join('');f=foot('OK','[B] Atrás');}
+  else if(scr=='status'){b=ST.map(r=>row(r[0]+' ....',r[1])).join('');f=foot('OK','[B] Atrás');}
+  else if(scr=='qr'){b=`<div class="qrbox">${qr(276,'#ffb000','#080500')}</div><p style="text-align:center">&gt; escanea con el teléfono_</p><p class="dim" style="text-align:center;font-size:15px">completa la red en el navegador</p>`;f=foot('Refrescar','[B] Atrás');}
+  else if(scr=='manual'){b=`<p class="dim" style="padding:8px">&gt; network_id (16 hex):</p>${idBox().replace('font:600 26px ui-monospace,Menlo,monospace','font:600 24px monospace')}${keypad()}`;f=foot('Teclear','[B] Borrar','[X] Unirse');}
+  else{b=NETS.map((n,i)=>row(n[0],n[2]?'[*]':'[ ]',i==0)+`<div class="dim" style="padding:0 8px 6px 34px;font-size:15px">${n[1]}</div>`).join('');f=foot('Conectar','[B] Atrás','[Y] Olvidar');}
+  return hd+`<div class="bd">${b}</div>`+f.replace(/Ⓐ/g,'[A]').replace(/Ⓑ/g,'[B]').replace('[B] [B]','[B]').replace(/Ⓧ/g,'[X]').replace(/Ⓨ/g,'[Y]');
+}
+const R=[r1,r2,r3,r4,r5];
+
+function draw(){
+  const p=document.getElementById('panel');
+  p.className='panel a'+(alt+1);
+  p.innerHTML=R[alt]();
+  document.querySelectorAll('#alts button').forEach((b,i)=>b.setAttribute('aria-selected',i==alt));
+  document.querySelectorAll('#screens button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s==scr));
+}
+function mk(id,items,fn){
+  const el=document.getElementById(id);
+  items.forEach((it,i)=>{const b=document.createElement('button');b.textContent=Array.isArray(it)?it[1]:it;b.dataset.s=Array.isArray(it)?it[0]:i;b.onclick=()=>{fn(i,it);draw()};el.appendChild(b)});
+}
+mk('alts',ALTS,(i)=>alt=i);
+mk('screens',SCREENS,(i,it)=>scr=it[0]);
+function fit(){
+  const w=document.getElementById('wrap'),k=Math.min(1,(w.clientWidth)/1282);
+  const s=document.getElementById('stage');s.style.transform=`scale(${k})`;w.style.height=(722*k)+'px';
+}
+addEventListener('resize',fit);
+draw();fit();
+</script>
+</body>
+</html>
