@@ -6,3 +6,9 @@ build/
 *.map
 tests/core_test
 ref/
+tests/server_test
+tests/qr_dump
+tests/qr_decode
+tests/qrcodegen.o
+tests/qr.pgm
+tests/qr.png
