@@ -1,6 +1,6 @@
 #!/bin/sh
 # Espera (hasta 55 min) a que el listado FTP completo funcione por la IP ZeroTier e imprime evidencia.
-IP=192.168.196.194; i=0
+IP="${1:?uso: zt-wait-ftp.sh <IP ZeroTier de la consola>}"; i=0
 while [ $i -lt 165 ]; do
     out=$(curl -s -m 12 -l ftp://$IP:5000/ 2>/dev/null)
     if [ -n "$out" ]; then

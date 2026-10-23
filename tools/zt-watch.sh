@@ -1,7 +1,7 @@
 #!/bin/sh
 # Solo lectura: cada 10 s registra ping, par de la consola e info local de ZeroTier.
-CONSOLE_IP=192.168.196.194
-NODE=e8dc8f406f
+CONSOLE_IP="${1:?uso: zt-watch.sh <IP ZeroTier de la consola> <NodeID>}"
+NODE="${2:?falta NodeID de la consola}"
 LOG="$HOME/Documents/zt-watch.log"
 while :; do
     ts=$(date '+%H:%M:%S')

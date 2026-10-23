@@ -14,7 +14,7 @@ Estado: **CERRADO con límites** (decisión del usuario, 2026-10-23). Cumplido p
 | 6 | Juegos solo con modo inalámbrico local (`ldn:u`) | No cumplido | No existe MITM de `ldn:u` (`README` de sys-GRID0, "current limitations") |
 | 7 | Camino directo (sin relay) | No cumplido | Par en `RELAY`, latencia 232–438 ms. El Mac está tras CGNAT del teléfono |
 
-## Verificado en la consola (00:48, Mac en el Wi-Fi "Fran")
+## Verificado en la consola (00:48, Mac en el Wi-Fi de la consola)
 - `config.ini`: `bsd_mitm = 1`, `nifm_mitm = 1`, `debug_logging = 1`, `port_mapping = 1`. Los dos MITM están activos.
 - `status.txt`: uptime 4784 s, `online yes`, `netstatus ok`, `fail 0`, `errno 0`. El módulo no se reinició durante la prueba (la prueba fue en uptime ~2700–3700 s).
 - `uplink.log` solo cubre uptime 4052–4784 s (~12 min), posterior a la prueba: 24 beats cada 30 s, sin huecos ni `PAUSE`/`OFFLINE`. No cubre la ventana de la prueba, por lo que no sirve como evidencia de ella.
