@@ -1,21 +1,26 @@
 # ZeroTier NX
 
-Overlay Ultrahand/Tesla para controlar ZeroTier en Nintendo Switch. Usa [sys-GRID0](https://github.com/redluigi323/sys-GRID0) como backend (sin modificarlo) y comparte con él los archivos de `sdmc:/config/sys-zerotier/`.
+ZeroTier en la Nintendo Switch, todo en uno: el **módulo** `sys-GRID0-tcp` (en `module/`, fork de [sys-GRID0](https://github.com/redluigi323/sys-GRID0) con TCP sobre lwIP y MITM ampliado para homebrew) y el **overlay Ultrahand/Tesla** `zerotier-nx` (este repo) para controlarlo.
 
-Pantallas: Menú, Estado, Login QR (servidor HTTP local en el overlay), Login manual y Redes guardadas.
+Con esto la consola entra en una red ZeroTier y funcionan por la VPN el ping, los juegos LAN por UDP de la lista blanca y homebrew por TCP (FTP de Sphaira verificado). Instalación completa y reversión en [INSTALACION.md](INSTALACION.md). Estado y límites en [GOAL.md](GOAL.md).
 
-## Requisitos
-- Atmosphère, nx-ovlloader y Ultrahand.
-- **sys-GRID0 v0.1.2 instalado.**
+Pantallas del overlay: Menú, Estado, Login QR (servidor HTTP local en el overlay), Login manual y Redes guardadas.
 
-## Instalación
-Copiar `zerotier-nx.ovl` a `sdmc:/switch/.overlays/`.
+## Instalar (usuarios)
+Descargue `zerotier-switch-<versión>.zip` de [Releases](../../releases) y copie su contenido a la raíz de la SD. Requiere Atmosphère y Ultrahand. Sin logs de depuración (`debug_logging = 0`).
 
-## Build
-`git submodule update --init` y luego `DEVKITPRO=/opt/devkitpro make`.
+## Compilar (desarrolladores)
+```
+git clone --recursive https://github.com/Jul879n/zerotier-nx.git
+cd zerotier-nx
+DEVKITPRO=/opt/devkitpro make                      # overlay
+make -C module                                      # módulo (ver module/README.md)
+RELEASE_REPO=Jul879n/zerotier-nx tools/release.sh v0.2.0
+```
+`tools/release.sh` arma el paquete de la SD (módulo + overlay + `config.ini` sin depuración) y crea el release en GitHub.
 
 ## Tests
-`make -C tests run`
+`make -C tests run` (overlay) y `make -C module/tests run SANITIZE=` (módulo).
 
 ## Prueba en consola (pendiente)
 - [ ] a) El overlay aparece en Ultrahand como "ZeroTier NX".
@@ -27,4 +32,4 @@ Copiar `zerotier-nx.ovl` a `sdmc:/switch/.overlays/`.
 - [ ] g) El toggle Conexión renombra `boot2.flag`.
 
 ## Créditos y licencias
-GPL-2.0 (por libultrahand). sys-GRID0 (MPL-2.0), libultrahand (GPL-2.0), nayuki/QR-Code-generator (MIT).
+GPL-2.0 (por libultrahand). sys-GRID0 y el fork con TCP (MPL-2.0), lwIP (BSD), libultrahand (GPL-2.0), nayuki/QR-Code-generator (MIT).

@@ -1,3 +1,6 @@
 [submodule "lib/libultrahand"]
 	path = lib/libultrahand
 	url = https://github.com/ppkantorski/libultrahand
+[submodule "module"]
+	path = module
+	url = https://github.com/Jul879n/sys-GRID0-tcp.git
