@@ -1,6 +1,6 @@
 # Goal: juegos y homebrew deben funcionar correctamente con VPN
 
-Estado: **NO cumplido**. Verificación al 2026-10-23. Prueba de aceptación elegida por el usuario: FTP de la consola (puerto 5000) por la IP de ZeroTier.
+Estado: **CERRADO con límites** (decisión del usuario, 2026-10-23). Cumplido para homebrew, FTP y TCP por VPN; fuera de alcance lo listado en "Límites del cierre". Verificación al 2026-10-23. Prueba de aceptación elegida por el usuario: FTP de la consola (puerto 5000) por la IP de ZeroTier.
 
 ## Criterios
 
@@ -33,3 +33,10 @@ Estado: **NO cumplido**. Verificación al 2026-10-23. Prueba de aceptación eleg
 2. Decidir si el TCP entrante se implementa en sys-GRID0 (lwIP + desvío de sockets): cambio grande en software de terceros, necesario para el criterio 4.
 3. Probar el Mac en una red sin CGNAT para medir el camino directo (criterio 7).
 4. Confirmar el criterio 3 en la consola durante 2 min.
+
+## Límites del cierre
+- **Medido:** FTP de Sphaira por VPN con `sys-GRID0-tcp.fast.nsp`: 748 447 B en 20 s con hash correcto (camino DIRECT; por la LAN sin VPN, 9 s). El usuario reportó que desde el teléfono con datos móviles (relay) funciona, algo lento; no se midió con el script.
+- **Sin probar:** ningún juego LAN por UDP (criterio 5).
+- **Sin soporte:** juegos solo con modo inalámbrico local (`ldn:u`, criterio 6).
+- **Sin garantía:** uso prolongado del módulo y camino directo tras CGNAT (criterio 7).
+- Entrega: release https://github.com/Jul879n/sys-GRID0-tcp/releases/tag/v0.2.0 y repo `Jul879n/sys-GRID0-tcp` (público).
