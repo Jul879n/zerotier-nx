@@ -22,14 +22,15 @@ RELEASE_REPO=Jul879n/zerotier-nx tools/release.sh v0.2.0
 ## Tests
 `make -C tests run` (overlay) y `make -C module/tests run SANITIZE=` (módulo).
 
-## Prueba en consola (pendiente)
-- [ ] a) El overlay aparece en Ultrahand como "ZeroTier NX".
-- [ ] b) Estado muestra IP, Node ID, Peers y Ping.
-- [ ] c) Login QR: el teléfono (misma Wi‑Fi) envía `8056c2e21c000001` y en ≤2 s el overlay muestra "Conectando a 8056C2E21C000001…"; `networks.ini` tiene la sección nueva y `selected`.
-- [ ] d) Un POST con token viejo responde 403.
-- [ ] e) El login manual guarda y conecta.
-- [ ] f) Redes guardadas: Ⓐ cambia de red, Ⓨ la olvida.
-- [ ] g) El toggle Conexión renombra `boot2.flag`.
+## Prueba en consola (verificada por el usuario)
+Marcadas como verificadas en la consola por el usuario (2026-10-23); no las repetí en esta sesión, salvo que el overlay aparece como "ZeroTier NX" y el Estado muestra "Conectado".
+- [x] a) El overlay aparece en Ultrahand como "ZeroTier NX".
+- [x] b) Estado muestra IP, Node ID, Peers y Ping.
+- [x] c) Login QR: el teléfono (misma Wi‑Fi) envía `8056c2e21c000001` y en ≤2 s el overlay muestra "Conectando a 8056C2E21C000001…"; `networks.ini` tiene la sección nueva y `selected`.
+- [x] d) Un POST con token viejo responde 403.
+- [x] e) El login manual guarda y conecta.
+- [x] f) Redes guardadas: Ⓐ cambia de red, Ⓨ la olvida.
+- [x] g) El toggle Conexión renombra `boot2.flag`.
 
 ## Créditos y licencias
 GPL-2.0 (por libultrahand). sys-GRID0 y el fork con TCP (MPL-2.0), lwIP (BSD), libultrahand (GPL-2.0), nayuki/QR-Code-generator (MIT).
