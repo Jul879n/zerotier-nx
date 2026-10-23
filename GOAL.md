@@ -6,10 +6,10 @@ Estado: **CERRADO con límites** (decisión del usuario, 2026-10-23). Cumplido p
 
 | # | Criterio | Estado | Evidencia |
 |---|---|---|---|
-| 1 | La consola se une a la red y responde ping por VPN | Cumplido | `ping 192.168.196.194` desde el Mac en la red del teléfono: 4/4, media 259 ms, por RELAY. `~/Documents/zt-watch.log`: 48/48 lecturas sin fallo (00:21–00:29) |
+| 1 | La consola se une a la red y responde ping por VPN | Cumplido | `ping <IP ZeroTier de la consola>` desde el Mac en la red del teléfono: 4/4, media 259 ms, por RELAY. `~/Documents/zt-watch.log`: 48/48 lecturas sin fallo (00:21–00:29) |
 | 2 | Cerrar el overlay no corta la VPN | Cumplido | Prueba A/B (`tools/zt-ab.sh`): ping continuo con el overlay cerrado de 00:24 a 00:29. El único corte (00:16–00:20) fue del relay recién establecido |
 | 3 | Estado del overlay estable (sin "no detectado") | Pendiente de confirmar | Corrección instalada (sha256 `0c01b67c…ee615` coincide). El usuario vio "Conectado" en una ventana; falta observarlo 2 min completos |
-| 4 | Homebrew por TCP (FTP de Sphaira, puerto 5000) accesible por VPN | **Cumplido** (2026-10-23, LAN) | Con `sys-GRID0-tcp.pasv.nsp` (sha256 `bc3feb0b…`): ruta por `feth2298` (interfaz ZeroTier); listado de `sdmc:` (47 entradas, 3 veces seguidas); descarga de `exefs.nsp` (746 535 B) con sha256 idéntico al instalado; subida de 3 MB aleatorios por VPN con sha256 igual verificado por la LAN; `bsd.log`: `ZT tcp accept … from 192.168.196.122`. Archivo de prueba borrado |
+| 4 | Homebrew por TCP (FTP de Sphaira, puerto 5000) accesible por VPN | **Cumplido** (2026-10-23, LAN) | Con `sys-GRID0-tcp.pasv.nsp` (sha256 `bc3feb0b…`): ruta por `feth2298` (interfaz ZeroTier); listado de `sdmc:` (47 entradas, 3 veces seguidas); descarga de `exefs.nsp` (746 535 B) con sha256 idéntico al instalado; subida de 3 MB aleatorios por VPN con sha256 igual verificado por la LAN; `bsd.log`: `ZT tcp accept … from <IP ZeroTier del Mac>`. Archivo de prueba borrado |
 | 5 | Juegos con modo LAN (UDP) funcionan por VPN | Sin verificar | El MITM de `bsd:u` desvía solo UDP en puertos 30000, 35000, 40000 y 49152–49155 (`bsd_shim.cpp:553`). No se probó ningún juego |
 | 6 | Juegos solo con modo inalámbrico local (`ldn:u`) | No cumplido | No existe MITM de `ldn:u` (`README` de sys-GRID0, "current limitations") |
 | 7 | Camino directo (sin relay) | No cumplido | Par en `RELAY`, latencia 232–438 ms. El Mac está tras CGNAT del teléfono |
