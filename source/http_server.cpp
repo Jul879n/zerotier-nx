@@ -2,8 +2,12 @@
 
 #include <arpa/inet.h>
 #include <cerrno>
+#include <cstdarg>
+#include <cstdio>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <sys/stat.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
@@ -32,6 +36,24 @@ constexpr const char *kFormHtml =
 
 constexpr const char kTokenChars[] = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
+// Diagnóstico del servidor sobre bsd:u real; el shim de pruebas de host no tiene sdmc:.
+void Log(const char *fmt, ...)
+{
+#ifdef __SWITCH__
+    ::mkdir("sdmc:/config/zerotier-nx", 0777);
+    FILE *f = std::fopen("sdmc:/config/zerotier-nx/http.log", "a");
+    if (f == nullptr) { return; }
+    va_list ap;
+    va_start(ap, fmt);
+    std::vfprintf(f, fmt, ap);
+    va_end(ap);
+    std::fputc('\n', f);
+    std::fclose(f);
+#else
+    (void)fmt;
+#endif
+}
+
 }  // namespace
 
 bool QrServer::Start()
@@ -54,13 +76,15 @@ bool QrServer::Start()
     }
 
     const SocketInitConfig cfg = {
-        .tcp_tx_buf_size = 0x1000,
-        .tcp_rx_buf_size = 0x1000,
+        .tcp_tx_buf_size = 0x2000,
+        .tcp_rx_buf_size = 0x2000,
         .tcp_tx_buf_max_size = 0,
         .tcp_rx_buf_max_size = 0,
         .udp_tx_buf_size = 512,
         .udp_rx_buf_size = 512,
-        .sb_efficiency = 1,
+        // Buffers por socket: con 1 el socket en escucha agota el juego y la conexión
+        // entrante (socket hijo) es reseteada sin llegar a accept().
+        .sb_efficiency = 3,
         .bsd_service_type = BsdServiceType_Auto,
     };
     const Result rc = socketInitialize(&cfg);
@@ -75,9 +99,7 @@ bool QrServer::Start()
     m_fd = ::socket(AF_INET, SOCK_STREAM, 0);
     int port = 0;
     if (m_fd >= 0) {
-        const int one = 1;
-        ::setsockopt(m_fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
-        for (int p = 8080; p <= 8089; ++p) {
+        for (int p = 47613; p <= 47622; ++p) {
             sockaddr_in addr = {};
             addr.sin_family = AF_INET;
             addr.sin_port = htons(static_cast<uint16_t>(p));
@@ -89,7 +111,12 @@ bool QrServer::Start()
             if (errno != EADDRINUSE) { break; }
         }
     }
+    if (m_fd >= 0) {
+        const int fl = ::fcntl(m_fd, F_GETFL, 0);
+        (void)::fcntl(m_fd, F_SETFL, fl | O_NONBLOCK);
+    }
     if (port == 0 || ::listen(m_fd, 2) != 0) {
+        Log("listen: errno=%d", errno);
         m_error = "Puerto ocupado";
         Stop();
         return false;
@@ -151,11 +178,14 @@ bool QrServer::TakePending(std::string &nwid, std::string &name)
 void QrServer::Loop(void *arg)
 {
     auto *self = static_cast<QrServer *>(arg);
+    // poll() no reporta POLLIN en sockets en escucha sobre bsd:u: accept no bloqueante con reintento.
     while (!self->m_stop) {
-        pollfd pfd = {self->m_fd, POLLIN, 0};
-        if (::poll(&pfd, 1, 200) <= 0 || !(pfd.revents & POLLIN)) { continue; }
         const int client = ::accept(self->m_fd, nullptr, nullptr);
-        if (client < 0) { continue; }
+        if (client < 0) {
+            if (errno != EAGAIN && errno != EWOULDBLOCK) { Log("accept: errno=%d", errno); }
+            ::usleep(50000);
+            continue;
+        }
         self->Serve(client);
         ::close(client);
     }
@@ -163,15 +193,24 @@ void QrServer::Loop(void *arg)
 
 void QrServer::Serve(int client)
 {
-    timeval tv = {2, 0};
-    ::setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
-
     std::string raw;
     HttpRequest req;
     char buf[1024];
+    int waits = 0;
     while (!req.complete) {
-        const ssize_t n = ::recv(client, buf, sizeof(buf), 0);
-        if (n <= 0) { return; }
+        ssize_t n = ::recv(client, buf, sizeof(buf), MSG_DONTWAIT);
+        if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+            if (++waits > 150) {
+                Log("recv: timeout");
+                return;
+            }
+            ::usleep(20000);
+            continue;
+        }
+        if (n <= 0) {
+            Log("recv: n=%d errno=%d", static_cast<int>(n), errno);
+            return;
+        }
         raw.append(buf, static_cast<size_t>(n));
         if (raw.size() > 4096) {
             const std::string r = HttpResponse(400, "text/plain; charset=utf-8", "Solicitud demasiado grande");
@@ -213,7 +252,8 @@ void QrServer::Serve(int client)
     } else {
         resp = HttpResponse(404, text, "No encontrado");
     }
-    ::send(client, resp.data(), resp.size(), 0);
+    const ssize_t sent = ::send(client, resp.data(), resp.size(), 0);
+    if (sent != static_cast<ssize_t>(resp.size())) { Log("send: %d de %d", static_cast<int>(sent), static_cast<int>(resp.size())); }
 }
 
 }  // namespace ztnx

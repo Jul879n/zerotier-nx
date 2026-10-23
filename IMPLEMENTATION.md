@@ -122,7 +122,7 @@ No existe equivalente en libnx ni en libultrahand. Clase `ztnx::QrServer`:
 - `bool Start()`:
   1. `nifmInitialize(NifmServiceType_User)` + `nifmGetCurrentIpAddress(&ip)`. Si falla o `ip==0` → `m_error = "Conecta la consola a Wi‑Fi"` y devuelve false.
   2. `socketInitialize(&cfg)` con `cfg = {tcp_tx_buf_size=0x1000, tcp_rx_buf_size=0x1000, tcp_tx_buf_max_size=0, tcp_rx_buf_max_size=0, udp_tx_buf_size=512, udp_rx_buf_size=512, sb_efficiency=1, bsd_service_type=BsdServiceType_Auto}`. Es el patrón de `ult::syncNtp` con buffers TCP. Si falla → `m_error = "No se pudo iniciar la red"`.
-  3. `socket(AF_INET, SOCK_STREAM)`, `SO_REUSEADDR`, y `bind` en el puerto 8080; si falla con `EADDRINUSE`, prueba de 8081 a 8089. Luego `listen(fd, 2)`. Si todos fallan → `m_error = "Puerto ocupado"`.
+  3. `socket(AF_INET, SOCK_STREAM)`, y `bind` en el puerto 47613 (el 8080 lo ocupa otro módulo de la consola y `bind` no falla ahí); si falla con `EADDRINUSE`, prueba de 47614 a 47622. Luego `listen(fd, 2)`. Si todos fallan → `m_error = "Puerto ocupado"`.
   4. Token: 6 caracteres de `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` generados con `randomGet`.
   5. URL: `http://a.b.c.d:PORT/?t=TOKEN`.
   6. Crea el hilo con `threadCreate(&m_thread, Loop, this, nullptr, 0x4000, 0x2C, -2)` + `threadStart`.

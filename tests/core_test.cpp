@@ -36,14 +36,28 @@ int main()
     CHECK(NodeIdFromIdentity("zzzzzzzzzz:0:abcd").empty());
     CHECK(NodeIdFromIdentity("").empty());
 
+    unsigned streak = 0;
+    CHECK(!KeepLastOnEmpty(streak, false));
+    CHECK(KeepLastOnEmpty(streak, true));
+    CHECK(KeepLastOnEmpty(streak, true));
+    CHECK(!KeepLastOnEmpty(streak, true));
+    CHECK(!KeepLastOnEmpty(streak, false));
+    CHECK(KeepLastOnEmpty(streak, true));
+
     CHECK(DisplayAddress("0.0.0.0/0") == "Sin asignar");
     CHECK(DisplayAddress("") == "Sin asignar");
     CHECK(DisplayAddress("10.147.17.42/24") == "10.147.17.42");
 
     CHECK(DisplayState("", "") == "sys-GRID0 no detectado");
-    CHECK(DisplayState("yes", "OK") == "Conectado");
-    CHECK(DisplayState("yes", "ACCESS_DENIED") == "ACCESS_DENIED");
-    CHECK(DisplayState("no", "OK") == "Conectando…");
+    // Valores reales de status.txt (zt_port.cpp): minúsculas con guiones.
+    CHECK(DisplayState("yes", "ok") == "Conectado");
+    CHECK(DisplayState("yes", "") == "Conectado");
+    CHECK(DisplayState("no", "ok") == "Conectando…");
+    CHECK(DisplayState("no", "requesting-configuration") == "Solicitando configuración…");
+    CHECK(DisplayState("yes", "requesting-configuration") == "Solicitando configuración…");
+    CHECK(DisplayState("no", "access-denied (authorise this node in ZeroTier Central)") == "Autoriza este nodo en ZeroTier Central");
+    CHECK(DisplayState("no", "not-found (check the network id in config.ini)") == "Red no encontrada: revisa el ID");
+    CHECK(DisplayState("yes", "port-error") == "port-error");
 
     const std::string body = "t=ABC234&nwid=8056C2E21C000001&name=Casa+LAN%21";
     const std::string head = "POST /join HTTP/1.1\r\ncontent-length: " + std::to_string(body.size()) + "\r\n\r\n";

@@ -39,7 +39,15 @@ std::string ReadFile(const char *path)
 Snapshot ReadSnapshot()
 {
     Snapshot s;
-    const std::string status = ReadFile(StatusPath);
+    std::string status = ReadFile(StatusPath);
+    if (status.empty()) {
+        // Ventana de reescritura de sys-GRID0 (delete + create + write).
+        svcSleepThread(50'000'000ULL);
+        status = ReadFile(StatusPath);
+    }
+    static Snapshot last;
+    static unsigned emptyStreak = 0;
+    if (KeepLastOnEmpty(emptyStreak, status.empty()) && last.backend) { return last; }
     s.backend = !status.empty();
     s.state = DisplayState(StatusValue(status, "online"), StatusValue(status, "netstatus"));
     s.ip = DisplayAddress(StatusValue(status, "address"));
@@ -47,6 +55,7 @@ Snapshot ReadSnapshot()
     s.network = IsHexNetworkId(nw) ? ToUpperHex(nw) : "";
     s.peers = ParsePeers(ReadFile(PeersPath));
     s.nodeId = NodeIdFromIdentity(ReadFile(IdentityPath));
+    if (s.backend) { last = s; }
     return s;
 }
 

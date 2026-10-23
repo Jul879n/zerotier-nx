@@ -18,3 +18,9 @@ Todo requiere consola con Atmosphère + Ultrahand + sys-GRID0 v0.1.2. Checklist 
 ## Mejoras posibles
 - Íconos por ítem (libultrahand no los ofrece en las APIs verificadas).
 - `theme.ini` propio con los colores de la opción 2.
+
+## Diagnóstico VPN (2026-10-23)
+- Verificado en logs de la consola: sin huecos en `uplink.log` (beat cada 30 s, sin PAUSE/OFFLINE). Cerrar el overlay no afecta al uplink en lo observado; el ping inestable desde el teléfono coincide con ruta solo por relay (`paths 0`, CGNAT).
+- Sin probar: prueba A/B con `tools/zt-watch.sh` (overlay abierto/cerrado) y comportamiento en reposo largo.
+- Parpadeo "sys-GRID0 no detectado": sys-GRID0 reescribe `status.txt` cada 10 s (delete + create). El overlay reintenta la lectura y conserva el último estado hasta 3 lecturas vacías seguidas. Falta verificar en la consola.
+- Servidor QR: se quitó el latido y los logs de arranque; `http.log` solo registra errores.

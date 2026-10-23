@@ -22,6 +22,11 @@ std::string NodeIdFromIdentity(const std::string &text);
 std::string DisplayAddress(const std::string &address);
 std::string DisplayState(const std::string &online, const std::string &netstatus);
 
+// sys-GRID0 reescribe status.txt (borra y crea), así que una lectura vacía aislada no
+// implica que el backend no esté. Devuelve true mientras haya que conservar el último
+// estado bueno; deja de hacerlo tras `limit` lecturas vacías seguidas.
+bool KeepLastOnEmpty(unsigned &emptyStreak, bool empty, unsigned limit = 3);
+
 struct HttpRequest {
     std::string method, path, query, body;
     bool complete = false;

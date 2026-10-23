@@ -147,11 +147,24 @@ std::string DisplayAddress(const std::string &address)
     return slash == std::string::npos ? address : address.substr(0, slash);
 }
 
+bool KeepLastOnEmpty(unsigned &emptyStreak, bool empty, unsigned limit)
+{
+    if (!empty) {
+        emptyStreak = 0;
+        return false;
+    }
+    return ++emptyStreak < limit;
+}
+
 std::string DisplayState(const std::string &online, const std::string &netstatus)
 {
     if (online.empty()) { return "sys-GRID0 no detectado"; }
+    // netstatus: minúsculas con guiones, a veces con una explicación entre paréntesis (zt_port.cpp).
+    if (netstatus.rfind("requesting-configuration", 0) == 0) { return "Solicitando configuración…"; }
+    if (netstatus.rfind("access-denied", 0) == 0) { return "Autoriza este nodo en ZeroTier Central"; }
+    if (netstatus.rfind("not-found", 0) == 0) { return "Red no encontrada: revisa el ID"; }
     if (online == "yes") {
-        return (netstatus.empty() || netstatus == "OK") ? "Conectado" : netstatus;
+        return (netstatus.empty() || netstatus == "ok") ? "Conectado" : netstatus;
     }
     return "Conectando…";
 }
